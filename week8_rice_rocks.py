@@ -291,13 +291,11 @@ def draw(canvas):
     # draw and update ship
     my_ship.draw(canvas)
     my_ship.update()
-    my_splosion.draw(canvas)
     
     #update and draw rock group, missile group, explosion group
     process_sprite_group(rock_group, canvas)
     process_sprite_group(missile_group, canvas)
     process_sprite_group(explosion_group, canvas)
-    print(explosion_group)
     
     # collisions
     if group_collide(rock_group, my_ship):
