@@ -66,6 +66,7 @@ asteroid_info = ImageInfo([45, 45], [90, 90], 40)
 asteroid_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/asteroid_blue.png")
 
 # animated explosion - explosion_orange.png, explosion_blue.png, explosion_blue2.png, explosion_alpha.png
+#                          center,   size,    radius, lifespan24, animated
 explosion_info = ImageInfo([64, 64], [128, 128], 17, 24, True)
 explosion_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/explosion_alpha.png")
 
@@ -99,6 +100,10 @@ def group_collide(group, other_object):
     flag = False
     for obj in set(group):
         if obj.collide(other_object):
+            #pos, vel, ang, ang_vel, image, info, sound = None
+            explosion_group.add(Sprite(other_object.get_position(), [0, 0], 0, 0, 
+                                       explosion_image, explosion_info, explosion_sound)
+                               )
             group.remove(obj)
             flag = True
     return flag
@@ -189,7 +194,7 @@ class Sprite:
         self.angle = ang
         self.angle_vel = ang_vel
         self.image = image
-        self.image_center = info.get_center()
+        self.image_center = list(info.get_center())
         self.image_size = info.get_size()
         self.radius = info.get_radius()
         self.lifespan = info.get_lifespan()
@@ -214,6 +219,10 @@ class Sprite:
         self.age += 1
         if self.age >= self.lifespan:
             return False
+        
+        #update animation
+        if self.animated:
+            self.image_center[0] += self.image_size[0]
         
         # update angle
         self.angle += self.angle_vel
@@ -262,7 +271,7 @@ def click(pos):
         soundtrack.play()
 
 def draw(canvas):
-    global time, started, lives, score, rock_group
+    global time, started, lives, score, rock_group, explosion_group
     
     # animiate background
     time += 1
@@ -282,10 +291,13 @@ def draw(canvas):
     # draw and update ship
     my_ship.draw(canvas)
     my_ship.update()
+    my_splosion.draw(canvas)
     
-    #update and draw rock group, missile group
+    #update and draw rock group, missile group, explosion group
     process_sprite_group(rock_group, canvas)
     process_sprite_group(missile_group, canvas)
+    process_sprite_group(explosion_group, canvas)
+    print(explosion_group)
     
     # collisions
     if group_collide(rock_group, my_ship):
@@ -321,6 +333,7 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
 rock_group = set()
 missile_group = set()
+explosion_group = set()
 
 # register handlers
 frame.set_keyup_handler(keyup)
